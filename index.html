@@ -2,20 +2,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    
-    <link rel="icon" type="image/png" href="/rp2040_web_flasher/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/rp2040_web_flasher/favicon.svg" />
-    <link rel="shortcut icon" href="/rp2040_web_flasher/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/rp2040_web_flasher/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="rp2040_web_flasher" />
-    <link rel="manifest" href="/rp2040_web_flasher/site.webmanifest" />
-
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <link rel="icon" type="image/png" href="./favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Web Flasher" />
+    <link rel="manifest" href="./site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-    <script type="module" crossorigin src="/rp2040_web_flasher/assets/index-B_Gda0KQ.js"></script>
-    <link rel="stylesheet" crossorigin href="/rp2040_web_flasher/assets/index-De-csjSt.css">
+    <meta name="description" content="Browser-based flashers for RP2040 MicroPython boards and ESP-Mosaico (ESP32-S31) boards. Everything stays in your browser." />
+    <title>Web Flasher</title>
+    <link rel="stylesheet" crossorigin href="./assets/layout-C-fAFTQg.css">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <header>
+        <a class="skip-link" href="#main-content">Skip to main content</a>
+        <div class="brand">
+          <div>
+            <h1>Web Flasher</h1>
+            <p>Flash microcontroller boards from your browser</p>
+          </div>
+        </div>
+      </header>
+      <main id="main-content" tabindex="-1">
+        <p class="intro">Pick your board. Firmware files and serial traffic stay in your browser; there is no upload server. You need desktop Chrome or Edge.</p>
+        <nav class="board-grid" aria-label="Flashers">
+          <a class="panel board-card" href="rp2040/">
+            <h2>RP2040</h2>
+            <p>MicroPython workbench: copy a UF2, transfer files, run REPL commands, and reboot.</p>
+            <span class="board-card-action">Open RP2040 flasher</span>
+          </a>
+          <a class="panel board-card" href="esp-mosaico/">
+            <h2>ESP-Mosaico</h2>
+            <p>ESP32-S31 firmware flasher: load an ESP-IDF build folder or .bin images and write them over USB.</p>
+            <span class="board-card-action">Open ESP-Mosaico flasher</span>
+          </a>
+        </nav>
+      </main>
+      <footer>
+        <p class="copyright">© 2025 fingerskier</p>
+      </footer>
+    </div>
   </body>
 </html>
