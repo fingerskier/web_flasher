@@ -15,7 +15,7 @@ Both need desktop Chrome or Edge with Web Serial support, on HTTPS or localhost.
 
 Flashes ESP-IDF images to an ESP-Mosaico using [esptool-js](https://github.com/espressif/esptool-js) and its ESP32-S31 flasher stub.
 
-1. **Load build folder**: choose your project's ESP-IDF `build/` directory. The page reads `flasher_args.json` and loads every listed image with its offset and flash settings. Alternatively, **add .bin files** and set the offsets yourself. Offsets are guessed from file names using the ESP32-S31 defaults: bootloader `0x2000`, partition table `0x8000`, app `0x10000`, merged image `0x0`.
+1. **Load build folder**: choose your project's ESP-IDF `build/` directory. The page reads `flasher_args.json` and loads every listed image with its offset. Alternatively, **add .bin files** and set the offsets yourself. Offsets are guessed from file names using the ESP32-S31 defaults: bootloader `0x2000`, partition table `0x8000`, app `0x10000`, merged image `0x0`.
 2. Tick the overwrite agreement, press **Flash firmware**, and choose the board's serial port.
 3. The page resets the board into its bootloader, writes each image, verifies it by MD5, and requests a reset.
 
@@ -25,6 +25,8 @@ Flashes ESP-IDF images to an ESP-Mosaico using [esptool-js](https://github.com/e
 
 - Only an ESP32-S31 is accepted. A different connected chip, a `flasher_args.json` for another target, or an image whose header names another chip stops the run before anything is written.
 - Files without an ESP image header (partition tables, data partitions) cannot be checked against the chip; the log says so when no image could be checked.
+- Images are written unchanged. Flash mode, frequency and size are whatever the build put in the bootloader header; the page does not rewrite them.
+- A merged image is also checked at the bootloader offsets other ESP chips use, so a merged build for another chip is refused.
 - Offsets must be 4 KiB aligned and images must not overlap.
 - Flashing cannot be cancelled part-way. A failed run can leave flash partly written with the board still in its bootloader; flash again.
 - A reset **request** is not a verified boot.

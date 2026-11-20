@@ -62,10 +62,6 @@ footer { padding: 1rem 0 1.5rem; min-width: 0; }
 .image-row input[type="text"] { width: 100%; margin-top: 0.25rem; }
 .image-name { min-width: 0; font-family: var(--mono); font-size: 0.85rem; overflow-wrap: anywhere; }
 .image-name small { display: block; color: var(--muted); font-family: inherit; }
-.settings-grid { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; margin-top: 1rem; }
-.settings-grid label { font-size: 0.8rem; color: var(--muted); }
-select { display: block; min-height: 42px; margin-top: 0.25rem; padding: 0.4rem 0.6rem; border: 1px solid #53616e; border-radius: 6px; background: #10161b; color: inherit; font: inherit; }
-select:disabled { color: #8996a2; cursor: not-allowed; }
 .hint { color: var(--muted); font-size: 0.85rem; }
 @media (max-width: 560px) {
   .image-row { grid-template-columns: minmax(0, 1fr); }

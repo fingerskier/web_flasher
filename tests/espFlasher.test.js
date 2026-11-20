@@ -58,14 +58,14 @@ describe('offsets and plans', () => {
 })
 
 describe('ESP-IDF build folder', () => {
-  it('reads offsets, settings and chip from flasher_args.json', () => {
+  it('reads offsets and chip from flasher_args.json', () => {
     const args = parseFlasherArgs(ARGS)
     expect(args.files).toEqual([
       { address: 0x2000, path: 'bootloader/bootloader.bin' },
       { address: 0x8000, path: 'partition_table/partition-table.bin' },
       { address: 0x10000, path: 'pbm_mosaico.bin' },
     ])
-    expect(args.settings).toEqual({ flashMode: 'dio', flashFreq: '80m', flashSize: '16MB' })
+    expect(args.chip).toBe('esp32s31')
   })
   it('refuses builds for other chips and malformed files', () => {
     expect(() => parseFlasherArgs(JSON.stringify({ flash_files: { '0x0': 'a.bin' }, extra_esptool_args: { chip: 'esp32s3' } }))).toThrow(/esp32s3/)
@@ -103,20 +103,29 @@ describe('image chip check', () => {
     const merged = new Uint8Array(0x2040).fill(0xff)
     merged.set(espImage(9), 0x2000)
     expect(() => checkImageChip(merged, { name: 'merged', address: 0 }, CHIP)).toThrow(/different chip/)
+    merged.set(espImage(32), 0x2000)
+    expect(checkImageChip(merged, { name: 'merged', address: 0 }, CHIP)).toBe(true)
+  })
+  it('rejects a merged image laid out for a chip whose bootloader sits at another offset', () => {
+    for (const offset of [0, 0x1000]) {
+      const merged = new Uint8Array(0x2040).fill(0xff)
+      merged.set(espImage(9), offset)
+      expect(() => checkImageChip(merged, { name: 'merged', address: 0 }, CHIP)).toThrow(/different chip/)
+    }
   })
 })
 
 describe('flash session', () => {
   const images = () => [{ name: 'app.bin', address: 0x10000, file: file(espImage(32)) }, { name: 'boot.bin', address: 0x2000, file: file(espImage(32)) }]
-  it('writes sorted images with MD5 verification, reports progress, resets and releases the port', async () => {
+  it('writes sorted images unmodified with MD5 verification, reports progress, resets and releases the port', async () => {
     const onProgress = vi.fn()
     const { esptool, calls } = fakeEsptool({ writeFlash: options => options.reportProgress(1, 5, 10) })
     const log = vi.fn()
-    const result = await flashImages({ serial: serial(), esptool, log, images: images(), settings: { flashMode: 'dio', flashFreq: '80m', flashSize: '16MB' }, eraseAll: true, onProgress })
+    const result = await flashImages({ serial: serial(), esptool, log, images: images(), eraseAll: true, onProgress })
     expect(result).toEqual({ status: 'success', chip: 'ESP32-S31 (fake)', resetRequested: true })
     const [write] = calls.writes
     expect(write.fileArray.map(f => f.address)).toEqual([0x2000, 0x10000])
-    expect(write).toMatchObject({ flashMode: 'dio', flashFreq: '80m', flashSize: '16MB', eraseAll: true, compress: true })
+    expect(write).toMatchObject({ flashMode: 'keep', flashFreq: 'keep', flashSize: 'keep', eraseAll: true, compress: true })
     expect(write.calculateMD5Hash(bytes('abc'))).toBe('900150983cd24fb0d6963f7d28e17f72')
     expect(onProgress).toHaveBeenCalledWith({ index: 1, count: 2, name: 'app.bin', completed: 5, total: 10 })
     expect(calls.after).toEqual(['hard_reset'])

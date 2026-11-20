@@ -51,7 +51,7 @@ describe('ESP-Mosaico page', () => {
     await userEvent.click(flash)
     const [call] = flasher.flashImages.mock.calls[0]
     expect(call.images.map(image => [image.name, image.address])).toEqual([['bootloader.bin', 0x2000], ['pbm_mosaico.bin', 0x10000]])
-    expect(call).toMatchObject({ eraseAll: false, settings: { flashMode: 'keep', flashFreq: 'keep', flashSize: 'keep' } })
+    expect(call.eraseAll).toBe(false)
     expect(screen.getByText(/Wrote and verified 2 images.*startup has not been verified/)).toBeTruthy()
     expect(agree.checked).toBe(false)
   })

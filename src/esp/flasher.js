@@ -10,11 +10,6 @@ export const BOARD = {
   appOffset: 0x10000,
 }
 
-export const FLASH_MODES = ['keep', 'dio', 'qio', 'dout', 'qout']
-export const FLASH_FREQS = ['keep', '80m', '60m', '48m', '40m', '30m', '26m', '24m', '20m', '16m', '15m', '12m']
-export const FLASH_SIZES = ['keep', 'detect', '1MB', '2MB', '4MB', '8MB', '16MB', '32MB', '64MB', '128MB']
-export const DEFAULT_SETTINGS = { flashMode: 'keep', flashFreq: 'keep', flashSize: 'keep' }
-
 const SECTOR = 0x1000
 const MAX_FLASH = 128 * 1024 * 1024
 const IMAGE_MAGIC = 0xe9
@@ -46,15 +41,8 @@ export function parseFlasherArgs(text) {
   if (!entries.length) throw new Error('flasher_args.json lists no flash files.')
   const chip = args.extra_esptool_args?.chip
   if (chip && chipKey(chip) !== BOARD.chip) throw new Error(`This build targets ${chip}; this page only flashes ${BOARD.chipName} (${BOARD.name}).`)
-  const pick = (value, allowed) => (allowed.includes(value) ? value : 'keep')
-  const settings = args.flash_settings ?? {}
   return {
     chip: chip ?? null,
-    settings: {
-      flashMode: pick(settings.flash_mode, FLASH_MODES),
-      flashFreq: pick(settings.flash_freq, FLASH_FREQS),
-      flashSize: pick(settings.flash_size, FLASH_SIZES),
-    },
     files: entries.map(([offset, path]) => ({ address: parseOffset(offset), path: String(path) })),
   }
 }
@@ -101,14 +89,20 @@ export function planImages(images) {
   return plan
 }
 
+// Bootloader offsets across ESP chips; a merged image holds its first header at one of them.
+const HEADER_OFFSETS = [0x0, 0x1000, 0x2000]
+
 // An ESP image header carries the chip it was built for. Returns true when one was found and matches.
 export function checkImageChip(data, image, chip) {
-  // A merged image starting below the bootloader holds its header at the bootloader offset.
-  const at = image.address < BOARD.bootloaderOffset ? BOARD.bootloaderOffset - image.address : 0
-  if (data.length < at + 16 || data[at] !== IMAGE_MAGIC) return false
-  const id = data[at + 12] | (data[at + 13] << 8)
-  if (id !== chip.IMAGE_CHIP_ID) throw new Error(`${image.name} was built for a different chip (image chip id ${id}, ${chip.CHIP_NAME} is ${chip.IMAGE_CHIP_ID}). Nothing was written.`)
-  return true
+  const positions = new Set([0, ...HEADER_OFFSETS.map(offset => offset - image.address).filter(at => at > 0)])
+  let found = false
+  for (const at of positions) {
+    if (data.length < at + 16 || data[at] !== IMAGE_MAGIC) continue
+    const id = data[at + 12] | (data[at + 13] << 8)
+    if (id !== chip.IMAGE_CHIP_ID) throw new Error(`${image.name} holds an image built for a different chip (image chip id ${id}, ${chip.CHIP_NAME} is ${chip.IMAGE_CHIP_ID}). Nothing was written.`)
+    found = true
+  }
+  return found
 }
 
 const cancelled = error => error?.name === 'NotFoundError' || error?.name === 'AbortError'
@@ -147,7 +141,7 @@ export function identifyBoard(deps) {
   return runSession(deps, async (loader, description) => ({ status: 'success', chip: description, resetRequested: await reset(loader, deps.log) }))
 }
 
-export async function flashImages({ images, settings = DEFAULT_SETTINGS, eraseAll = false, onProgress, ...deps }) {
+export async function flashImages({ images, eraseAll = false, onProgress, ...deps }) {
   const plan = planImages(images)
   const data = await Promise.all(plan.map(async image => new Uint8Array(await image.file.arrayBuffer())))
   return runSession(deps, async (loader, description) => {
@@ -158,7 +152,10 @@ export async function flashImages({ images, settings = DEFAULT_SETTINGS, eraseAl
     try {
       await loader.writeFlash({
         fileArray: plan.map((image, i) => ({ data: data[i], address: image.address })),
-        ...settings,
+        // Images are written byte-for-byte. esptool-js 0.7.1 mishandles header rewrites
+        // (stale appended SHA-256, unsupported frequencies), and ESP-IDF already bakes
+        // the flash settings into the bootloader header.
+        flashMode: 'keep', flashFreq: 'keep', flashSize: 'keep',
         eraseAll,
         compress: true,
         calculateMD5Hash: md5,

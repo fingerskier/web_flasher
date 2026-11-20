@@ -2,9 +2,8 @@ import { useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import PageHeader from '@/shared/PageHeader'
 import DeviceLog from '@/shared/DeviceLog'
 import { createLogStore } from '@/shared/logStore'
-import { BOARD, DEFAULT_SETTINGS, FLASH_FREQS, FLASH_MODES, FLASH_SIZES, flashImages, guessOffset, hex, identifyBoard, parseOffset, planImages, readBuildFolder } from './flasher.js'
+import { BOARD, flashImages, guessOffset, hex, identifyBoard, parseOffset, planImages, readBuildFolder } from './flasher.js'
 
-const SETTINGS = [['flashMode', 'Flash mode', FLASH_MODES], ['flashFreq', 'Flash frequency', FLASH_FREQS], ['flashSize', 'Flash size', FLASH_SIZES]]
 const size = bytes => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KiB`)
 const offsetOf = text => { try { return { address: parseOffset(text) } } catch (error) { return { error: error.message } } }
 
@@ -14,7 +13,6 @@ export default function App({ esptool }) {
   const nextId = useRef(0)
   const inFlight = useRef(false)
   const [images, setImages] = useState([])
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [eraseAll, setEraseAll] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -48,7 +46,6 @@ export default function App({ esptool }) {
   const loadFolder = () => run(async () => {
     const build = await readBuildFolder(await window.showDirectoryPicker({ mode: 'read' }))
     replaceImages(build.images.map(image => entry(image.name, image.file, image.address)))
-    setSettings(build.settings)
     setStatus(`Loaded ${build.images.length} images from flasher_args.json.`)
   })
 
@@ -68,7 +65,7 @@ export default function App({ esptool }) {
 
   const flash = () => run(async () => {
     const result = await flashImages({
-      ...deps, images: rows, settings, eraseAll,
+      ...deps, images: rows, eraseAll,
       onProgress: ({ index, count, name, completed, total }) => setProgress({ label: `Writing ${name} (${index + 1} of ${count})`, completed, total }),
     })
     if (result.status !== 'success') return
@@ -100,14 +97,7 @@ export default function App({ esptool }) {
             </li>)}
           </ul>}
           {planError && <p role="alert">{planError}</p>}
-          <div className="settings-grid">
-            {SETTINGS.map(([key, label, options]) => <label key={key}>{label}
-              <select value={settings[key]} disabled={busy} onChange={e => setSettings(current => ({ ...current, [key]: e.target.value }))}>
-                {options.map(option => <option key={option} value={option}>{option}</option>)}
-              </select>
-            </label>)}
-          </div>
-          <p className="hint">“keep” leaves the value already in the image header. {BOARD.name} defaults: bootloader {hex(BOARD.bootloaderOffset)}, partition table {hex(BOARD.partitionTableOffset)}, app {hex(BOARD.appOffset)}.</p>
+          <p className="hint">Images are written unchanged; flash mode, frequency and size come from the bootloader image header. {BOARD.name} default offsets: bootloader {hex(BOARD.bootloaderOffset)}, partition table {hex(BOARD.partitionTableOffset)}, app {hex(BOARD.appOffset)}.</p>
         </section>
         <section className="panel transfer-panel" aria-labelledby="flash-heading">
           <h2 id="flash-heading">Flash</h2>
