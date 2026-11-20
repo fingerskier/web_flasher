@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
-import CommandButton from '@/com/CommandButton'
-import UploadFirmware from '@/com/UploadFirmware'
-import UploadFile from '@/com/UploadFile'
-import { useDevice } from '@/lib/DeviceContext'
+import CommandButton from '@/rp2040/com/CommandButton'
+import UploadFirmware from '@/rp2040/com/UploadFirmware'
+import UploadFile from '@/rp2040/com/UploadFile'
+import { useDevice } from '@/rp2040/lib/DeviceContext'
 
 export default function Main() {
   const { connect, disconnect, triggerFsMode, triggerReplMode, reboot,

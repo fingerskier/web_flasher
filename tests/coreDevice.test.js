@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest'
 import { execFileSync } from 'node:child_process'
-import { createDeviceController } from '../src/lib/deviceController.js'
+import { createDeviceController } from '../src/rp2040/lib/deviceController.js'
 
 function fakeTransport() {
   let push, finish

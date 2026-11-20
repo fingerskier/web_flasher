@@ -2,7 +2,7 @@
 import { it, expect, vi } from 'vitest'
 import { createElement, StrictMode } from 'react'
 import { render, act, cleanup } from '@testing-library/react'
-import { DeviceProvider, useDevice, useDeviceLogs } from '../src/lib/DeviceContext.jsx'
+import { DeviceProvider, useDevice, useDeviceLogs } from '../src/rp2040/lib/DeviceContext.jsx'
 
 it('survives StrictMode effect replay, isolates log subscriptions, and releases on unmount', async () => {
   let controller, enqueue

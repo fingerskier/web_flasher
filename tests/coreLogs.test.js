@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { createLogStore } from '../src/lib/logStore.js'
+import { createLogStore } from '../src/shared/logStore.js'
 
 describe('bounded log store', () => {
   it('bounds huge partial chunks and complete lines, publishing once per batch', async () => {

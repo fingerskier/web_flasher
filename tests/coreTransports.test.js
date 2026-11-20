@@ -1,5 +1,5 @@
 import { it, expect, vi } from 'vitest'
-import { openSerial, openUsb, resolveUsbInterface } from '../src/lib/deviceTransports.js'
+import { openSerial, openUsb, resolveUsbInterface } from '../src/rp2040/lib/deviceTransports.js'
 
 it('rolls back partial serial setup and attempts every cleanup even on cancellation failure', async () => {
   const close = vi.fn(async () => {})

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { copyUF2 } from '../src/lib/firmware.js'
+import { copyUF2 } from '../src/rp2040/lib/firmware.js'
 
 function firmware({ blocks = 2, name = 'MicroPython.UF2', mutate } = {}) {
   const bytes = new Uint8Array(blocks * 512)

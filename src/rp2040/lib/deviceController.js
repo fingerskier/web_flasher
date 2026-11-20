@@ -1,4 +1,4 @@
-import { createLogStore } from './logStore.js'
+import { createLogStore } from '../../shared/logStore.js'
 import { beginMicroPython, uploadMicroPython } from './micropython.js'
 import { openSerial, openUsb } from './deviceTransports.js'
 

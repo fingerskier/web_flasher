@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useDevice } from '@/lib/DeviceContext'
+import { useDevice } from '@/rp2040/lib/DeviceContext'
 
 export default function UploadFirmware() {
   const fileInput = useRef()

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { useDevice } from '@/lib/DeviceContext'
+import { useDevice } from '@/rp2040/lib/DeviceContext'
 
 export default function CommandButton({ label, command, disabled = false }) {
   const { sendCommand, isConnected, isBusy, isConnecting, isDisconnecting } = useDevice()

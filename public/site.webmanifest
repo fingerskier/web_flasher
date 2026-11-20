@@ -1,6 +1,6 @@
 {
-  "name": "RP2040 MicroPython Flasher",
-  "short_name": "RP2040 Flasher",
+  "name": "Web Flasher",
+  "short_name": "Web Flasher",
   "start_url": "./",
   "scope": "./",
   "icons": [

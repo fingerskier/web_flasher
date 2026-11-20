@@ -2,15 +2,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import UploadFile from '../src/com/UploadFile'
-import UploadFirmware from '../src/com/UploadFirmware'
-import Main from '../src/com/Main'
-import Footer from '../src/com/Footer'
-import CommandButton from '../src/com/CommandButton'
-import Header from '../src/com/Header'
+import UploadFile from '../src/rp2040/com/UploadFile'
+import UploadFirmware from '../src/rp2040/com/UploadFirmware'
+import Main from '../src/rp2040/com/Main'
+import Footer from '../src/rp2040/com/Footer'
+import CommandButton from '../src/rp2040/com/CommandButton'
+import Header from '../src/rp2040/com/Header'
 
 const { device, logState } = vi.hoisted(() => ({ device: {}, logState: {} }))
-vi.mock('@/lib/DeviceContext', () => ({ useDevice: () => device, useDeviceLogs: () => logState }))
+vi.mock('@/rp2040/lib/DeviceContext', () => ({ useDevice: () => device, useDeviceLogs: () => logState }))
 beforeEach(() => {
   Object.assign(device, { isConnected: true, isConnecting: false, isDisconnecting: false, isBusy: false,
     error: null, operation: null, connect: vi.fn(), disconnect: vi.fn(), uploadFile: vi.fn(), copyUF2: vi.fn(),
